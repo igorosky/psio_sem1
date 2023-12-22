@@ -46,4 +46,8 @@ public class Person implements Serializable {
     public boolean equals(Object obj) {
         return obj instanceof Person && obj.toString().equals(toString());
     }
+
+    public String getName() {
+        return String.format("%s %s", lname, fname);
+    }
 }
