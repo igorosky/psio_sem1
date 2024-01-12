@@ -34,6 +34,8 @@ import College.People.Person;
 import College.People.Scientist;
 import College.People.Student;
 import College.People.Worker;
+import Filter.Filter;
+import Filter.Filter.FilterParam;
 import GUI.AddPerson.Callback;
 import ObjectSaver.ObjectSaver;
 
@@ -45,13 +47,16 @@ public class MainMenu {
 
     private Button buttonAdd;
     private Button buttonDelete;
-    private Button buttonEdit;
+    private Button filterButton;
+    private Button clearFiltersButton;
     private Button buttonSave;
     private Button buttonLoad;
 
     private List list;
     private TextArea textArea;
     private JPanel panel;
+
+    private ArrayList<Filter.FilterParam<Person>> filters;
     
     class WindowClose extends WindowAdapter {
         public void windowClosing(WindowEvent windowEvent) {
@@ -71,8 +76,8 @@ public class MainMenu {
         list.removeAll();
         textArea.setText("");
         buttonDelete.setEnabled(false);
-        buttonEdit.setEnabled(false);
-        for (Person person : people) {
+        Filter<Person> filter = new Filter<>();
+        for (Person person : filter.filter(people, filters)) {
             list.add(person.getName());
         }
         buttonSave.setEnabled(!people.isEmpty());
@@ -80,6 +85,7 @@ public class MainMenu {
     
     public MainMenu() {
         people = new ArrayList<>();
+        filters = new ArrayList<>();
         panel = new JPanel();
         
         mainFrame = new Frame("College");
@@ -150,7 +156,6 @@ public class MainMenu {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 buttonDelete.setEnabled(true);
-                buttonEdit.setEnabled(true);
                 textArea.setText(people.get(list.getSelectedIndex()).toString());
                 final Person selectedPerson = people.get(list.getSelectedIndex());
                 panel.removeAll();
@@ -319,13 +324,38 @@ public class MainMenu {
             }
             
         });
-        buttonEdit = new Button("Edit"); 
-        buttonEdit.setEnabled(false);
+        filterButton = new Button("Filter");
+        filterButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new FilterMenu(mainFrame, new FilterMenu.Callback() {
+
+                    @Override
+                    public void callback(ArrayList<FilterParam<Person>> filters_) {
+                        filters = filters_;
+                        updateList();
+                    }
+                    
+                }, filters);
+            }
+            
+        });
+        clearFiltersButton = new Button("Clear Filters");
+        clearFiltersButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                filters.clear();
+                updateList();
+            }
+            
+        });
 
         Panel end = new Panel(new FlowLayout(FlowLayout.LEFT));
         end.add(buttonAdd);
         end.add(buttonDelete);
-        end.add(buttonEdit);
+        end.add(filterButton);
         
         mainFrame.add(top, BorderLayout.PAGE_START);
         mainFrame.add(list, BorderLayout.LINE_START);

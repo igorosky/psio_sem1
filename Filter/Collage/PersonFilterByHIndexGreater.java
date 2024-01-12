@@ -1,9 +1,10 @@
-package Filter;
+package Filter.Collage;
 
 import College.People.Person;
 import College.People.Scientist;
+import Filter.Filter.FilterParam;
 
-public class PersonFilterByHIndexGreater implements Filter.FilterParam<Person> {
+public class PersonFilterByHIndexGreater implements FilterParam<Person> {
 
     private final int lowerBound;
 
@@ -14,6 +15,10 @@ public class PersonFilterByHIndexGreater implements Filter.FilterParam<Person> {
     @Override
     public boolean isGood(final Person person) {
         return person != null && person instanceof Scientist && ((Scientist)person).gethIndex() > lowerBound;
+    }
+
+    public int getLowerBound() {
+        return lowerBound;
     }
     
 }
