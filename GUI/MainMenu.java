@@ -11,7 +11,6 @@ import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.List;
 import java.awt.Panel;
-import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,13 +19,13 @@ import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.Collection;
 
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileSystemView;
 
+import Backend.Backend;
 import College.Department;
 import College.DepartmentNotExistException;
 import College.People.Employee;
@@ -34,17 +33,11 @@ import College.People.Person;
 import College.People.Scientist;
 import College.People.Student;
 import College.People.Worker;
-import Filter.Filter;
 import Filter.Filter.FilterParam;
 import GUI.AddPerson.Callback;
-import ObjectSaver.ObjectSaver;
 
 public class MainMenu {
     private Frame mainFrame;
-    
-    // It would be way better to use some orderedSet (like SortedSet but it does not implements Serializable)
-    private ArrayList<Person> people;
-    private ArrayList<Person> displayedPeople;
 
     private Button buttonAdd;
     private Button buttonDelete;
@@ -54,10 +47,10 @@ public class MainMenu {
     private Button buttonLoad;
 
     private List list;
-    private TextArea textArea;
     private JPanel panel;
+    private ArrayList<FilterParam<Person>> filters;
+    private Backend backend;
 
-    private ArrayList<Filter.FilterParam<Person>> filters;
     
     class WindowClose extends WindowAdapter {
         public void windowClosing(WindowEvent windowEvent) {
@@ -66,30 +59,18 @@ public class MainMenu {
     }
     
     private void updateList() {
-        people.sort(new Comparator<Person>() {
-
-            @Override
-            public int compare(Person o1, Person o2) {
-                return o1.compareTo(o2);
-            }
-            
-        });
         list.removeAll();
-        textArea.setText("");
         buttonDelete.setEnabled(false);
-        Filter<Person> filter = new Filter<>();
-        displayedPeople.clear();
-        for (Person person : filter.filter(people, filters)) {
-            list.add(person.getName());
-            displayedPeople.add(person);
-        }
+        Collection<Person> people = backend.displayPeople(filters);
         buttonSave.setEnabled(!people.isEmpty());
+        for (Person person : people) {
+            list.add(person.getName());
+        }
     }
     
-    public MainMenu() {
-        people = new ArrayList<>();
+    public MainMenu(Backend bcd) {
+        backend = bcd;
         filters = new ArrayList<>();
-        displayedPeople = new ArrayList<>();
         panel = new JPanel();
         
         mainFrame = new Frame("College");
@@ -110,7 +91,7 @@ public class MainMenu {
                         if(e.getActionCommand() != "ApproveSelection") {
                             return;
                         }
-                        ObjectSaver.serialize(people, fileChooser.getSelectedFile());
+                        backend.save(fileChooser.getSelectedFile());
                     }
                     
                 });
@@ -131,13 +112,7 @@ public class MainMenu {
                         if(e.getActionCommand() != "ApproveSelection") {
                             return;
                         }
-                        Optional<ArrayList<Person>> result = ObjectSaver.deserialize(fileChooser.getSelectedFile());
-                        if(!result.isPresent()) {
-                            // TODO
-                            System.out.println("Not found");
-                            return;
-                        }
-                        people = result.get();
+                        backend.load(fileChooser.getSelectedFile());
                         updateList();
                     }
                     
@@ -147,9 +122,6 @@ public class MainMenu {
             
         });
 
-        textArea = new TextArea();
-        textArea.setEditable(false);
-        
         Panel top = new Panel(new FlowLayout(FlowLayout.LEFT));
         top.add(buttonSave);
         top.add(buttonLoad);
@@ -160,8 +132,7 @@ public class MainMenu {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 buttonDelete.setEnabled(true);
-                textArea.setText(people.get(list.getSelectedIndex()).toString());
-                final Person selectedPerson = displayedPeople.get(list.getSelectedIndex());
+                final Person selectedPerson = backend.getCurrentlyDisplayedPeople().get(list.getSelectedIndex());
                 panel.removeAll();
                 java.util.List<Component> toAdd = new ArrayList<>();
 
@@ -309,7 +280,7 @@ public class MainMenu {
 
                     @Override
                     public void callback(Person person) {
-                        people.add(person);
+                        backend.addPerson(person);
                         updateList();
                     }
                     
@@ -323,7 +294,7 @@ public class MainMenu {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                people.remove(displayedPeople.get(list.getSelectedIndex()));
+                backend.removeDisplayedPerson(list.getSelectedIndex());
                 updateList();
             }
             

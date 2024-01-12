@@ -154,6 +154,7 @@ public class FilterMenu extends Dialog {
         add(cancelButton);
         add(okButton);
 
+        setModalityType(ModalityType.APPLICATION_MODAL);
         setVisible(true);
     }
     

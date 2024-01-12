@@ -91,6 +91,7 @@ public class CoursesManager extends Dialog {
         add(displayList, BorderLayout.CENTER);
         add(bottom, BorderLayout.PAGE_END);
         updateList();
+        setModalityType(ModalityType.APPLICATION_MODAL);
         setVisible(true);
     }
     
