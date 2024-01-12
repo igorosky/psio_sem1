@@ -4,9 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.Choice;
-import java.awt.Dialog;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.List;
 import java.awt.Panel;
@@ -21,13 +22,18 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import College.Course;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.filechooser.FileSystemView;
+
 import College.Department;
 import College.DepartmentNotExistException;
+import College.People.Employee;
 import College.People.Person;
 import College.People.Scientist;
 import College.People.Student;
 import College.People.Worker;
+import GUI.AddPerson.Callback;
 import ObjectSaver.ObjectSaver;
 
 public class MainMenu {
@@ -41,233 +47,14 @@ public class MainMenu {
     private Button buttonSave;
     private Button buttonLoad;
 
-    List list;
-    TextArea textArea;
+    private List list;
+    private TextArea textArea;
+    private JPanel panel;
     
     class WindowClose extends WindowAdapter {
         public void windowClosing(WindowEvent windowEvent) {
             System.exit(0);
         }
-    }
-
-    class DialogClose extends WindowAdapter {
-        final Dialog dialog;
-        
-        private DialogClose(final Dialog dialog) {
-            this.dialog = dialog;
-        }
-        
-        public void windowClosing(final WindowEvent windowEvent) {
-            dialog.setVisible(false);
-        }
-    }
-
-    class DialogGetString extends Dialog {
-        private TextField text;
-        private Button button;
-        
-        public DialogGetString(Dialog owner) {
-            super(owner);
-            text = new TextField(11);
-            button = new Button("Ok");
-            setLayout(new FlowLayout());
-            add(text);
-            add(button);
-            addWindowListener(new DialogClose(this));
-            setModalityType(ModalityType.APPLICATION_MODAL);
-            setSize(200, 70);
-            setResizable(false);
-        }
-        
-        public DialogGetString(Frame owner) {
-            super(owner);
-            text = new TextField(11);
-            button = new Button("Ok");
-            setLayout(new FlowLayout());
-            add(text);
-            add(button);
-            addWindowListener(new DialogClose(this));
-            setModalityType(ModalityType.APPLICATION_MODAL);
-            setSize(200, 70);
-            setResizable(false);
-        }
-    }
-
-    class DialogPeron extends Dialog {
-        private Label fnameLabel;
-        private TextField fname;
-        private Label lnameLabel;
-        private TextField lname;
-        private Label emailLabel;
-        private TextField email;
-
-        private Choice type;
-
-        // Employee
-        // private Department department;
-        private Choice departmentChoice;
-
-        // Scientist
-        private Label hIndexLabel;
-        private TextField hIndex;
-
-        // Worker
-        private Checkbox worksInOffice;
-        private Checkbox worksShifts;
-        private Label positionLabel;
-        private TextField position;
-
-        // Student
-        private Label indexNumberLabel;
-        private TextField indexNumber;
-        private List courses;
-        private Button buttonCoursesAdd;
-        private Button buttonCoursesRemove;
-
-        private Button buttonOk;
-        private Button buttonCancel;
-
-        public DialogPeron(Frame owner) {
-            super(owner);
-            buttonCancel = new Button("Cancel");
-            buttonCancel.addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    setVisible(false);
-                }
-                
-            });
-
-            buttonOk = new Button("Ok");
-
-            fnameLabel = new Label("First name:");
-            fname = new TextField(15);
-            lnameLabel = new Label("Last name:");
-            lname = new TextField(15);
-            emailLabel = new Label("Email:");
-            email = new TextField(15);
-            type = new Choice();
-            type.add("Scientist");
-            type.add("Student");
-            type.add("Worker");
-            type.select(0);
-            departmentChoice = new Choice();
-
-            hIndexLabel = new Label("HIndex:");
-            hIndex = new TextField(9);
-
-            worksInOffice = new Checkbox("Works in office");
-            worksInOffice.setEnabled(false);
-            worksShifts = new Checkbox("Works shifts");
-            worksShifts.setEnabled(false);
-            positionLabel = new Label("Position:");
-            positionLabel.setEnabled(false);
-            position = new TextField(15);
-            position.setEnabled(false);
-
-            indexNumberLabel = new Label("Index:");
-            indexNumberLabel.setEnabled(false);
-            indexNumber = new TextField(15);
-            indexNumber.setEnabled(false);
-            courses = new List();
-            courses.setEnabled(false);
-            courses.addItemListener(new ItemListener() {
-
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-                    buttonCoursesRemove.setEnabled(true);
-                }
-                
-            });
-            buttonCoursesAdd = new Button("Add");
-            buttonCoursesAdd.setEnabled(false);
-            Dialog tmp = this;
-            buttonCoursesAdd.addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    DialogGetString dialog = new DialogGetString(tmp);
-                    dialog.setTitle("Subject name");
-                    dialog.button.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            if(dialog.text.getText().isEmpty()) {
-                                return;
-                            }
-                            courses.add(dialog.text.getText());
-                            dialog.setVisible(false);
-                        }
-                        
-                    });
-                    dialog.setVisible(true);
-                }
-                
-            });
-            buttonCoursesRemove = new Button("Remove");
-            buttonCoursesRemove.addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    courses.remove(courses.getSelectedIndex());
-                }
-                
-            });
-            buttonCoursesRemove.setEnabled(false);
-            
-            type.addItemListener(new ItemListener() {
-
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-                    departmentChoice.setEnabled(type.getSelectedIndex() != 1);
-                    hIndexLabel.setEnabled(type.getSelectedIndex() == 0);
-                    hIndex.setEnabled(type.getSelectedIndex() == 0);
-                    worksInOffice.setEnabled(type.getSelectedIndex() == 2);
-                    worksShifts.setEnabled(type.getSelectedIndex() == 2);
-                    positionLabel.setEnabled(type.getSelectedIndex() == 2);
-                    position.setEnabled(type.getSelectedIndex() == 2);
-                    indexNumberLabel.setEnabled(type.getSelectedIndex() == 1);
-                    indexNumber.setEnabled(type.getSelectedIndex() == 1);
-                    courses.setEnabled(type.getSelectedIndex() == 1);
-                    buttonCoursesAdd.setEnabled(type.getSelectedIndex() == 1);
-                    buttonCoursesRemove.setEnabled(type.getSelectedIndex() == 1 && courses.getSelectedIndex() != -1);
-                }
-                
-            });
-
-            for(int i = 1; i <= 14; ++i) {
-                departmentChoice.add(String.format("W%d%s", i, i == 4 ? "N" : ""));
-            }
-
-            setLayout(new FlowLayout(FlowLayout.LEADING));
-            add(fnameLabel);
-            add(fname);
-            add(lnameLabel);
-            add(lname);
-            add(emailLabel);
-            add(email);
-            add(type);
-            add(departmentChoice);
-            add(hIndexLabel);
-            add(hIndex);
-            add(worksInOffice);
-            add(worksShifts);
-            add(positionLabel);
-            add(position);
-            add(indexNumberLabel);
-            add(indexNumber);
-            add(courses);
-            add(buttonCoursesAdd);
-            add(buttonCoursesRemove);
-            add(buttonCancel);
-            add(buttonOk);
-            addWindowListener(new DialogClose(this));
-            setSize(200, 600);
-            setModalityType(ModalityType.APPLICATION_MODAL);
-            setVisible(true);
-        }
-
     }
     
     private void updateList() {
@@ -283,6 +70,7 @@ public class MainMenu {
     
     public MainMenu() {
         people = new ArrayList<>();
+        panel = new JPanel();
         
         mainFrame = new Frame("College");
         mainFrame.setSize(600, 400);
@@ -294,23 +82,19 @@ public class MainMenu {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogGetString getName = new DialogGetString(mainFrame);
-                getName.setTitle("Save file");
-                getName.button.setLabel("Save");
-                getName.button.addActionListener(new ActionListener() {
+                JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView());
+                fileChooser.addActionListener(new ActionListener() {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if(getName.text.getText().isEmpty()) {
-                            // TODO
+                        if(e.getActionCommand() != "ApproveSelection") {
                             return;
                         }
-                        ObjectSaver.serialize(people, getName.text.getText());
-                        getName.setVisible(false);
+                        ObjectSaver.serialize(people, fileChooser.getSelectedFile());
                     }
                     
                 });
-                getName.setVisible(true);
+                fileChooser.showSaveDialog(mainFrame);
             }
             
         });
@@ -319,18 +103,15 @@ public class MainMenu {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogGetString getName = new DialogGetString(mainFrame);
-                getName.setTitle("Load file");
-                getName.button.setLabel("Load");
-                getName.button.addActionListener(new ActionListener() {
+                JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView());
+                fileChooser.addActionListener(new ActionListener() {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if(getName.text.getText().isEmpty()) {
-                            // TODO
+                        if(e.getActionCommand() != "ApproveSelection") {
                             return;
                         }
-                        Optional<ArrayList<Person>> result = ObjectSaver.deserialize(getName.text.getText());
+                        Optional<ArrayList<Person>> result = ObjectSaver.deserialize(fileChooser.getSelectedFile());
                         if(!result.isPresent()) {
                             // TODO
                             System.out.println("Not found");
@@ -338,11 +119,10 @@ public class MainMenu {
                         }
                         people = result.get();
                         updateList();
-                        getName.setVisible(false);
                     }
                     
                 });
-                getName.setVisible(true);
+                fileChooser.showOpenDialog(mainFrame);
             }
             
         });
@@ -362,6 +142,111 @@ public class MainMenu {
                 buttonDelete.setEnabled(true);
                 buttonEdit.setEnabled(true);
                 textArea.setText(people.get(list.getSelectedIndex()).toString());
+                final Person selectedPerson = people.get(list.getSelectedIndex());
+                panel.removeAll();
+                java.util.List<Component> toAdd = new ArrayList<>();
+
+                TextField firstName = new TextField(selectedPerson.getFname());
+                TextField lastName = new TextField(selectedPerson.getLname());
+                TextField email = new TextField(selectedPerson.getMail());
+                TextField index = new TextField();
+                Choice department = new Choice();
+                Checkbox worksShifts;
+                Checkbox worksInOffice;
+                
+                for(int i = 1; i <= 14; ++i) {
+                    department.add(String.format("W%d%s", i, i == 4 ? "N" : ""));
+                }
+
+                toAdd.add(new Label("Type:"));
+                toAdd.add(new Label(selectedPerson instanceof Student ? "Student" : (selectedPerson instanceof Scientist ? "Scientist" : "Worker")));
+                toAdd.add(new Label("First name:"));
+                toAdd.add(firstName);
+                toAdd.add(new Label("Last name:"));
+                toAdd.add(lastName);
+                toAdd.add(new Label("Email:"));
+                toAdd.add(email);
+                Button saveButton = new Button("Save");
+
+                saveButton.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        selectedPerson.setFname(firstName.getText());
+                        selectedPerson.setLname(lastName.getText());
+                        selectedPerson.setMail(email.getText());
+                        updateList();
+                    }
+                    
+                });
+
+                if(selectedPerson instanceof Employee) {
+                    Employee employee = (Employee)selectedPerson;
+                    department.select(Department.getIndex(employee.getDepartment()));
+                    toAdd.add(new Label("Department:"));
+                    toAdd.add(department);
+                    
+                    saveButton.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            try {
+                                employee.setDepartment(Department.getDepartment(department.getSelectedIndex() + 1));
+                            }
+                            catch(final DepartmentNotExistException ex) {
+                                // Infallible
+                            }
+                        }
+                        
+                    });
+                }
+
+                if(selectedPerson instanceof Student) {
+                    index.setText(((Student)selectedPerson).getIndexNumber());
+                    toAdd.add(new Label("Index"));
+                    toAdd.add(index);
+                    // TODO courses
+                }
+                else if(selectedPerson instanceof Scientist) {
+                    Scientist scientist = ((Scientist)selectedPerson);
+                    index.setText(Integer.toString(scientist.gethIndex()));
+                    toAdd.add(new Label("HIndex"));
+                    toAdd.add(index);
+
+                    saveButton.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            scientist.sethIndex(Integer.parseInt(index.getText()));
+                        }
+                        
+                    });
+                }
+                else if(selectedPerson instanceof Worker) {
+                    Worker worker = ((Worker)selectedPerson);
+                    worksShifts = new Checkbox();
+                    worksInOffice = new Checkbox();
+                    worksShifts.setState(worker.isWorksShifts());
+                    worksInOffice.setState(worker.isWorksInOffice());
+                    toAdd.add(new Label("Works shifts:"));
+                    toAdd.add(worksShifts);
+                    toAdd.add(new Label("Works in office:"));
+                    toAdd.add(worksInOffice);
+                    toAdd.add(new Label("Position:"));
+                    index.setText(worker.getPosition());
+                    toAdd.add(index);
+                }
+                
+                panel.setLayout(new GridLayout(toAdd.size() / 2 + 1, 2));
+                for(Component component : toAdd) {
+                    panel.add(component);
+                }
+
+                panel.add(new Panel());
+                
+                panel.add(saveButton);
+                
+                mainFrame.revalidate();
             }
             
         });
@@ -371,49 +256,11 @@ public class MainMenu {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogPeron dialog = new DialogPeron(mainFrame);
-                dialog.buttonOk.addActionListener(new ActionListener() {
+                new AddPerson(mainFrame, new Callback() {
 
                     @Override
-                    public void actionPerformed(ActionEvent e) {
-                        switch(dialog.type.getSelectedIndex()) {
-                        case 0: // Scientist
-                            {
-                                int hIdx = Integer.parseInt(dialog.hIndex.getText());
-                                try {
-                                    people.add(new Scientist(dialog.fname.getText(), dialog.lname.getText(), dialog.email.getText(), Department.getDepartment(dialog.departmentChoice.getSelectedIndex() + 1), hIdx));
-                                }
-                                catch(DepartmentNotExistException ex) {
-                                    // impossible
-                                }
-                                break;
-                            }
-                        case 1: // Student
-                            {
-                                Student student = new Student(dialog.fname.getText(), dialog.lname.getText(), dialog.email.getText(),dialog. indexNumber.getText());
-                                for(int i = 0; i < dialog.courses.getItemCount(); ++i) {
-                                    student.addCourse(new Course(dialog.courses.getItem(i)));
-                                }
-                                people.add(student);
-                                break;
-                            }
-                        case 2: // Worker
-                            {
-                                try {
-                                    people.add(new Worker(dialog.fname.getText(), dialog.lname.getText(), dialog.email.getText(), Department.getDepartment(dialog.departmentChoice.getSelectedIndex() + 1), dialog.worksInOffice.getState(), dialog.worksShifts.getState(), dialog.position.getText()));
-                                }
-                                catch(DepartmentNotExistException ex) {
-                                    // impossible
-                                }
-                                break;
-                            }
-                        default:
-                            {
-                                // Impossible state
-                                return;
-                            }
-                        }
-                        dialog.setVisible(false);
+                    public void callback(Person person) {
+                        people.add(person);
                         updateList();
                     }
                     
@@ -432,7 +279,7 @@ public class MainMenu {
             }
             
         });
-        buttonEdit = new Button("Edit");
+        buttonEdit = new Button("Edit"); 
         buttonEdit.setEnabled(false);
 
         Panel end = new Panel(new FlowLayout(FlowLayout.LEFT));
@@ -442,7 +289,7 @@ public class MainMenu {
         
         mainFrame.add(top, BorderLayout.PAGE_START);
         mainFrame.add(list, BorderLayout.LINE_START);
-        mainFrame.add(textArea, BorderLayout.CENTER);
+        mainFrame.add(panel, BorderLayout.CENTER);
         mainFrame.add(end, BorderLayout.PAGE_END);
         mainFrame.addWindowListener(new WindowClose());
 

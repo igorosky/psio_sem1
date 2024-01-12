@@ -51,4 +51,39 @@ public enum Department {
                 throw new DepartmentNotExistException();
         }
     }
+
+    public static int getIndex(final Department department) {
+        switch(department) {
+            case W1:
+                return 0;
+            case W2:
+                return 1;
+            case W3:
+                return 2;
+            case W4N:
+                return 3;
+            case W5:
+                return 4;
+            case W6:
+                return 5;
+            case W7:
+                return 6;
+            case W8:
+                return 7;
+            case W9:
+                return 8;
+            case W10:
+                return 9;
+            case W11:
+                return 10;
+            case W12:
+                return 11;
+            case W13:
+                return 12;
+            case W14:
+                return 13;
+            default:
+                return -1; // Impossible state
+        }
+    }
 }
