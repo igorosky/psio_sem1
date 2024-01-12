@@ -7,12 +7,12 @@ import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Label;
-import java.awt.List;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.HashSet;
 
 import College.Course;
 import College.Department;
@@ -30,7 +30,7 @@ public class AddPerson extends Dialog {
     private Label emailLabel;
     private TextField email;
 
-    Choice type;
+    private Choice type;
 
     // Employee
     // private Department department;
@@ -49,11 +49,8 @@ public class AddPerson extends Dialog {
     // Student
     private Label indexNumberLabel;
     private TextField indexNumber;
-    private List courses;
-    private Button buttonCoursesAdd;
-    private Button buttonCoursesRemove;
 
-    Button buttonOk;
+    private Button buttonOk;
     private Button buttonCancel;
 
     public interface Callback {
@@ -103,51 +100,18 @@ public class AddPerson extends Dialog {
         indexNumberLabel.setEnabled(false);
         indexNumber = new TextField(15);
         indexNumber.setEnabled(false);
-        courses = new List();
-        courses.setEnabled(false);
-        courses.addItemListener(new ItemListener() {
 
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                buttonCoursesRemove.setEnabled(true);
-            }
-            
-        });
-        buttonCoursesAdd = new Button("Add");
-        buttonCoursesAdd.setEnabled(false);
+        HashSet<Course> courses = new HashSet<>();
+        Button manageCoursesButton = new Button("Manage");
         Dialog tmp = this;
-        buttonCoursesAdd.addActionListener(new ActionListener() {
+        manageCoursesButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogGetString dialog = new DialogGetString(tmp);
-                setTitle("Subject name");
-                dialog.getButton().addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if(dialog.getText().getText().isEmpty()) {
-                            return;
-                        }
-                        courses.add(dialog.getText().getText());
-                        setVisible(false);
-                    }
-                    
-                });
-                setVisible(true);
+                new CoursesManager(tmp, courses);
             }
             
         });
-        buttonCoursesRemove = new Button("Remove");
-        buttonCoursesRemove.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                courses.remove(courses.getSelectedIndex());
-            }
-            
-        });
-        buttonCoursesRemove.setEnabled(false);
         
         type.addItemListener(new ItemListener() {
 
@@ -162,9 +126,7 @@ public class AddPerson extends Dialog {
                 position.setEnabled(type.getSelectedIndex() == 2);
                 indexNumberLabel.setEnabled(type.getSelectedIndex() == 1);
                 indexNumber.setEnabled(type.getSelectedIndex() == 1);
-                courses.setEnabled(type.getSelectedIndex() == 1);
-                buttonCoursesAdd.setEnabled(type.getSelectedIndex() == 1);
-                buttonCoursesRemove.setEnabled(type.getSelectedIndex() == 1 && courses.getSelectedIndex() != -1);
+                manageCoursesButton.setEnabled(type.getSelectedIndex() == 1);
             }
             
         });
@@ -192,8 +154,8 @@ public class AddPerson extends Dialog {
                 case 1: // Student
                     {
                         Student student = new Student(fname.getText(), lname.getText(), email.getText(), indexNumber.getText());
-                        for(int i = 0; i < courses.getItemCount(); ++i) {
-                            student.addCourse(new Course(courses.getItem(i)));
+                        for(Course course : courses) {
+                            student.addCourse(course);
                         }
                         callback.callback(student);
                         break;
@@ -236,9 +198,8 @@ public class AddPerson extends Dialog {
         add(position);
         add(indexNumberLabel);
         add(indexNumber);
-        add(courses);
-        add(buttonCoursesAdd);
-        add(buttonCoursesRemove);
+        add(new Label("Courses"));
+        add(manageCoursesButton);
         add(buttonCancel);
         add(buttonOk);
         addWindowListener(new DialogClose(this));

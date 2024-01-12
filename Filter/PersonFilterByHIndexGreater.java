@@ -1,9 +1,9 @@
-package PersonFilters;
+package Filter;
 
 import College.People.Person;
 import College.People.Scientist;
 
-public class PersonFilterByHIndexGreater implements PersonFilter {
+public class PersonFilterByHIndexGreater implements Filter.FilterParam<Person> {
 
     private final int lowerBound;
 

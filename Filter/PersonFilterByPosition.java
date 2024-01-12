@@ -1,9 +1,9 @@
-package PersonFilters;
+package Filter;
 
 import College.People.Person;
 import College.People.Worker;
 
-public class PersonFilterByPosition implements PersonFilter {
+public class PersonFilterByPosition implements Filter.FilterParam<Person> {
 
     private final String position;
 

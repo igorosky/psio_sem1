@@ -2,7 +2,7 @@ package College.People;
 
 import java.io.Serializable;
 
-public class Person implements Serializable {
+public class Person implements Serializable, Comparable<Person> {
     private String fname;
     private String lname;
     private String mail;
@@ -36,6 +36,10 @@ public class Person implements Serializable {
     public void setMail(final String mail) {
         this.mail = mail;
     }
+    
+    public String getName() {
+        return String.format("%s %s", lname, fname);
+    }
 
     @Override
     public String toString() {
@@ -47,7 +51,8 @@ public class Person implements Serializable {
         return obj instanceof Person && obj.toString().equals(toString());
     }
 
-    public String getName() {
-        return String.format("%s %s", lname, fname);
+    @Override
+    public int compareTo(Person o) {
+        return getName().compareTo(((Person)o).getName());
     }
 }

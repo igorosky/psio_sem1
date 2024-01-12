@@ -1,8 +1,8 @@
-package PersonFilters;
+package Filter;
 
 import College.People.Person;
 
-public class PersonFilterByLName implements PersonFilter {
+public class PersonFilterByLName implements Filter.FilterParam<Person> {
 
     private final String lname; 
     

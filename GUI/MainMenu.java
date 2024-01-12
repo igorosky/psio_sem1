@@ -20,6 +20,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Optional;
 
 import javax.swing.JFileChooser;
@@ -39,6 +40,7 @@ import ObjectSaver.ObjectSaver;
 public class MainMenu {
     private Frame mainFrame;
     
+    // It would be way better to use some orderedSet (like SortedSet but it does not implements Serializable)
     private ArrayList<Person> people;
 
     private Button buttonAdd;
@@ -58,6 +60,14 @@ public class MainMenu {
     }
     
     private void updateList() {
+        people.sort(new Comparator<Person>() {
+
+            @Override
+            public int compare(Person o1, Person o2) {
+                return o1.compareTo(o2);
+            }
+            
+        });
         list.removeAll();
         textArea.setText("");
         buttonDelete.setEnabled(false);
@@ -202,15 +212,35 @@ public class MainMenu {
                 }
 
                 if(selectedPerson instanceof Student) {
-                    index.setText(((Student)selectedPerson).getIndexNumber());
-                    toAdd.add(new Label("Index"));
+                    Student student = (Student)selectedPerson;
+                    index.setText(student.getIndexNumber());
+                    toAdd.add(new Label("Index:"));
                     toAdd.add(index);
-                    // TODO courses
+                    toAdd.add(new Label("Courses:"));
+                    Button coursesManagerButton = new Button("Manage");
+                    coursesManagerButton.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            new CoursesManager(mainFrame, student.getCourses());
+                        }
+                        
+                    });
+                    toAdd.add(coursesManagerButton);
+
+                    saveButton.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            student.setIndexNumber(index.getText());
+                        }
+                        
+                    });
                 }
                 else if(selectedPerson instanceof Scientist) {
                     Scientist scientist = ((Scientist)selectedPerson);
                     index.setText(Integer.toString(scientist.gethIndex()));
-                    toAdd.add(new Label("HIndex"));
+                    toAdd.add(new Label("HIndex:"));
                     toAdd.add(index);
 
                     saveButton.addActionListener(new ActionListener() {
@@ -235,6 +265,16 @@ public class MainMenu {
                     toAdd.add(new Label("Position:"));
                     index.setText(worker.getPosition());
                     toAdd.add(index);
+                    saveButton.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            worker.setWorksInOffice(worksInOffice.getState());
+                            worker.setWorksShifts(worksShifts.getState());
+                            worker.setPosition(index.getText());
+                        }
+                        
+                    });
                 }
                 
                 panel.setLayout(new GridLayout(toAdd.size() / 2 + 1, 2));

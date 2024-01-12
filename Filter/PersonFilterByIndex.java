@@ -1,9 +1,9 @@
-package PersonFilters;
+package Filter;
 
 import College.People.Person;
 import College.People.Student;
 
-public class PersonFilterByIndex implements PersonFilter {
+public class PersonFilterByIndex implements Filter.FilterParam<Person> {
     private final String idx;
 
     public PersonFilterByIndex(final String idx) {

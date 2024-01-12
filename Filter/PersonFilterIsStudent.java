@@ -1,9 +1,9 @@
-package PersonFilters;
+package Filter;
 
 import College.People.Person;
 import College.People.Student;
 
-public class PersonFilterIsStudent implements PersonFilter {
+public class PersonFilterIsStudent implements Filter.FilterParam<Person> {
 
     @Override
     public boolean isGood(final Person person) {
