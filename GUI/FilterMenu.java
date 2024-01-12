@@ -43,7 +43,7 @@ public class FilterMenu extends Dialog {
         Checkbox byPosition = new Checkbox("Position");
         TextField position = new TextField();
 
-        Checkbox byGeHIndex = new Checkbox("Minimum HIndex");
+        Checkbox byGeHIndex = new Checkbox("Above HIndex");
         TextField HIndex = new TextField();
 
         Checkbox byType = new Checkbox("Type");

@@ -44,6 +44,7 @@ public class MainMenu {
     
     // It would be way better to use some orderedSet (like SortedSet but it does not implements Serializable)
     private ArrayList<Person> people;
+    private ArrayList<Person> displayedPeople;
 
     private Button buttonAdd;
     private Button buttonDelete;
@@ -77,8 +78,10 @@ public class MainMenu {
         textArea.setText("");
         buttonDelete.setEnabled(false);
         Filter<Person> filter = new Filter<>();
+        displayedPeople.clear();
         for (Person person : filter.filter(people, filters)) {
             list.add(person.getName());
+            displayedPeople.add(person);
         }
         buttonSave.setEnabled(!people.isEmpty());
     }
@@ -86,6 +89,7 @@ public class MainMenu {
     public MainMenu() {
         people = new ArrayList<>();
         filters = new ArrayList<>();
+        displayedPeople = new ArrayList<>();
         panel = new JPanel();
         
         mainFrame = new Frame("College");
@@ -157,7 +161,7 @@ public class MainMenu {
             public void itemStateChanged(ItemEvent e) {
                 buttonDelete.setEnabled(true);
                 textArea.setText(people.get(list.getSelectedIndex()).toString());
-                final Person selectedPerson = people.get(list.getSelectedIndex());
+                final Person selectedPerson = displayedPeople.get(list.getSelectedIndex());
                 panel.removeAll();
                 java.util.List<Component> toAdd = new ArrayList<>();
 
@@ -319,7 +323,7 @@ public class MainMenu {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                people.remove(list.getSelectedIndex());
+                people.remove(displayedPeople.get(list.getSelectedIndex()));
                 updateList();
             }
             
@@ -356,6 +360,7 @@ public class MainMenu {
         end.add(buttonAdd);
         end.add(buttonDelete);
         end.add(filterButton);
+        end.add(clearFiltersButton);
         
         mainFrame.add(top, BorderLayout.PAGE_START);
         mainFrame.add(list, BorderLayout.LINE_START);

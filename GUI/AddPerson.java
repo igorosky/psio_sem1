@@ -4,7 +4,6 @@ import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Dialog;
-import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Label;
 import java.awt.TextField;
@@ -13,6 +12,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.HashSet;
+
+import javax.swing.BoxLayout;
 
 import College.Course;
 import College.Department;
@@ -181,7 +182,7 @@ public class AddPerson extends Dialog {
             
         });
 
-        setLayout(new FlowLayout(FlowLayout.LEADING));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         add(fnameLabel);
         add(fname);
         add(lnameLabel);
@@ -198,7 +199,7 @@ public class AddPerson extends Dialog {
         add(position);
         add(indexNumberLabel);
         add(indexNumber);
-        add(new Label("Courses"));
+        add(new Label("Courses:"));
         add(manageCoursesButton);
         add(buttonCancel);
         add(buttonOk);
