@@ -18,6 +18,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -132,141 +133,7 @@ public class MainMenu {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 buttonDelete.setEnabled(true);
-                final Person selectedPerson = backend.getCurrentlyDisplayedPeople().get(list.getSelectedIndex());
-                panel.removeAll();
-                java.util.List<Component> toAdd = new ArrayList<>();
-
-                TextField firstName = new TextField(selectedPerson.getFname());
-                TextField lastName = new TextField(selectedPerson.getLname());
-                TextField email = new TextField(selectedPerson.getMail());
-                TextField index = new TextField();
-                Choice department = new Choice();
-                Checkbox worksShifts;
-                Checkbox worksInOffice;
-                
-                for(int i = 1; i <= 14; ++i) {
-                    department.add(String.format("W%d%s", i, i == 4 ? "N" : ""));
-                }
-
-                toAdd.add(new Label("Type:"));
-                toAdd.add(new Label(selectedPerson instanceof Student ? "Student" : (selectedPerson instanceof Scientist ? "Scientist" : "Worker")));
-                toAdd.add(new Label("First name:"));
-                toAdd.add(firstName);
-                toAdd.add(new Label("Last name:"));
-                toAdd.add(lastName);
-                toAdd.add(new Label("Email:"));
-                toAdd.add(email);
-                Button saveButton = new Button("Save");
-
-                saveButton.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        selectedPerson.setFname(firstName.getText());
-                        selectedPerson.setLname(lastName.getText());
-                        selectedPerson.setMail(email.getText());
-                        updateList();
-                    }
-                    
-                });
-
-                if(selectedPerson instanceof Employee) {
-                    Employee employee = (Employee)selectedPerson;
-                    department.select(Department.getIndex(employee.getDepartment()));
-                    toAdd.add(new Label("Department:"));
-                    toAdd.add(department);
-                    
-                    saveButton.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            try {
-                                employee.setDepartment(Department.getDepartment(department.getSelectedIndex() + 1));
-                            }
-                            catch(final DepartmentNotExistException ex) {
-                                // Infallible
-                            }
-                        }
-                        
-                    });
-                }
-
-                if(selectedPerson instanceof Student) {
-                    Student student = (Student)selectedPerson;
-                    index.setText(student.getIndexNumber());
-                    toAdd.add(new Label("Index:"));
-                    toAdd.add(index);
-                    toAdd.add(new Label("Courses:"));
-                    Button coursesManagerButton = new Button("Manage");
-                    coursesManagerButton.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            new CoursesManager(mainFrame, student.getCourses());
-                        }
-                        
-                    });
-                    toAdd.add(coursesManagerButton);
-
-                    saveButton.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            student.setIndexNumber(index.getText());
-                        }
-                        
-                    });
-                }
-                else if(selectedPerson instanceof Scientist) {
-                    Scientist scientist = ((Scientist)selectedPerson);
-                    index.setText(Integer.toString(scientist.gethIndex()));
-                    toAdd.add(new Label("HIndex:"));
-                    toAdd.add(index);
-
-                    saveButton.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            scientist.sethIndex(Integer.parseInt(index.getText()));
-                        }
-                        
-                    });
-                }
-                else if(selectedPerson instanceof Worker) {
-                    Worker worker = ((Worker)selectedPerson);
-                    worksShifts = new Checkbox();
-                    worksInOffice = new Checkbox();
-                    worksShifts.setState(worker.isWorksShifts());
-                    worksInOffice.setState(worker.isWorksInOffice());
-                    toAdd.add(new Label("Works shifts:"));
-                    toAdd.add(worksShifts);
-                    toAdd.add(new Label("Works in office:"));
-                    toAdd.add(worksInOffice);
-                    toAdd.add(new Label("Position:"));
-                    index.setText(worker.getPosition());
-                    toAdd.add(index);
-                    saveButton.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            worker.setWorksInOffice(worksInOffice.getState());
-                            worker.setWorksShifts(worksShifts.getState());
-                            worker.setPosition(index.getText());
-                        }
-                        
-                    });
-                }
-                
-                panel.setLayout(new GridLayout(toAdd.size() / 2 + 1, 2));
-                for(Component component : toAdd) {
-                    panel.add(component);
-                }
-
-                panel.add(new Panel());
-                
-                panel.add(saveButton);
-                
-                mainFrame.revalidate();
+                drawSelectedPersonPanel(backend.getCurrentlyDisplayedPeople().get(list.getSelectedIndex()));
             }
             
         });
@@ -340,5 +207,167 @@ public class MainMenu {
         mainFrame.addWindowListener(new WindowClose());
 
         mainFrame.setVisible(true);
+    }
+
+    protected void drawSelectedPersonPanel(Person selectedPerson) {
+        panel.removeAll();
+        java.util.List<Component> toAdd = new ArrayList<>();
+
+        TextField firstName = new TextField(selectedPerson.getFname());
+        TextField lastName = new TextField(selectedPerson.getLname());
+        TextField email = new TextField(selectedPerson.getMail());
+        TextField index = new TextField();
+        Choice department = new Choice();
+        Checkbox worksShifts;
+        Checkbox worksInOffice;
+        
+        for(int i = 1; i <= 14; ++i) {
+            department.add(String.format("W%d%s", i, i == 4 ? "N" : ""));
+        }
+
+        toAdd.add(new Label("Type:"));
+        toAdd.add(new Label(selectedPerson instanceof Student ? "Student" : (selectedPerson instanceof Scientist ? "Scientist" : "Worker")));
+        toAdd.add(new Label("First name:"));
+        toAdd.add(firstName);
+        toAdd.add(new Label("Last name:"));
+        toAdd.add(lastName);
+        toAdd.add(new Label("Email:"));
+        toAdd.add(email);
+        Button saveButton = new Button("Save");
+
+        saveButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedPerson.setFname(firstName.getText());
+                selectedPerson.setLname(lastName.getText());
+                selectedPerson.setMail(email.getText());
+                updateList();
+            }
+            
+        });
+
+        if(selectedPerson instanceof Employee) {
+            Employee employee = (Employee)selectedPerson;
+            department.select(Department.getIndex(employee.getDepartment()));
+            toAdd.add(new Label("Salary:"));
+            toAdd.add(new Label(Float.toString(backend.getSalary(employee))));
+            toAdd.add(new Label("Department:"));
+            toAdd.add(department);
+            
+            saveButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        employee.setDepartment(Department.getDepartment(department.getSelectedIndex() + 1));
+                    }
+                    catch(final DepartmentNotExistException ex) {
+                        // Infallible
+                    }
+                }
+                
+            });
+        }
+
+        if(selectedPerson instanceof Student) {
+            Student student = (Student)selectedPerson;
+            index.setText(student.getIndexNumber());
+            toAdd.add(new Label("Stipend:"));
+            toAdd.add(new Label(Float.toString(backend.getStipend(student))));
+            toAdd.add(new Label("Index:"));
+            toAdd.add(index);
+            toAdd.add(new Label("Courses:"));
+            Button coursesManagerButton = new Button("Manage");
+            coursesManagerButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    CoursesManager cm = new CoursesManager(mainFrame, student.getCourses());
+                    cm.addWindowListener(new WindowListener() {
+
+                        @Override
+                        public void windowClosed(WindowEvent e) { drawSelectedPersonPanel(selectedPerson); }
+                        @Override
+                        public void windowOpened(WindowEvent e) { }
+                        @Override
+                        public void windowClosing(WindowEvent e) { }
+                        @Override
+                        public void windowIconified(WindowEvent e) { }
+                        @Override
+                        public void windowDeiconified(WindowEvent e) { }
+                        @Override
+                        public void windowActivated(WindowEvent e) { }
+                        @Override
+                        public void windowDeactivated(WindowEvent e) { }
+                        
+                    });
+                }
+                
+            });
+            toAdd.add(coursesManagerButton);
+
+            saveButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    student.setIndexNumber(index.getText());
+                    drawSelectedPersonPanel(selectedPerson);
+                }
+                
+            });
+        }
+        else if(selectedPerson instanceof Scientist) {
+            Scientist scientist = ((Scientist)selectedPerson);
+            index.setText(Integer.toString(scientist.gethIndex()));
+            toAdd.add(new Label("HIndex:"));
+            toAdd.add(index);
+
+            saveButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    scientist.sethIndex(Integer.parseInt(index.getText()));
+                    drawSelectedPersonPanel(selectedPerson);
+                }
+                
+            });
+        }
+        else if(selectedPerson instanceof Worker) {
+            Worker worker = ((Worker)selectedPerson);
+            worksShifts = new Checkbox();
+            worksInOffice = new Checkbox();
+            worksShifts.setState(worker.isWorksShifts());
+            worksInOffice.setState(worker.isWorksInOffice());
+            toAdd.add(new Label("Works shifts:"));
+            toAdd.add(worksShifts);
+            toAdd.add(new Label("Works in office:"));
+            toAdd.add(worksInOffice);
+            toAdd.add(new Label("Position:"));
+            index.setText(worker.getPosition());
+            toAdd.add(index);
+            saveButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    worker.setWorksInOffice(worksInOffice.getState());
+                    worker.setWorksShifts(worksShifts.getState());
+                    worker.setPosition(index.getText());
+                    drawSelectedPersonPanel(selectedPerson);
+                }
+                
+            });
+        }
+        
+        panel.setLayout(new GridLayout(toAdd.size() / 2 + 1, 2));
+        for(Component component : toAdd) {
+            panel.add(component);
+        }
+
+        panel.add(new Panel());
+        
+        panel.add(saveButton);
+        
+        mainFrame.revalidate();
     }
 }
