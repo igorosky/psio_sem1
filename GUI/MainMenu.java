@@ -5,6 +5,7 @@ import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridLayout;
@@ -12,6 +13,7 @@ import java.awt.Label;
 import java.awt.List;
 import java.awt.Panel;
 import java.awt.TextField;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -22,11 +24,16 @@ import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileSystemView;
 
 import Backend.Backend;
+import Backend.StipendStrategies.LinearCourseCountBased;
+import Backend.StipendStrategies.LogCourseCountBased;
+import Backend.WageStrategies.AdvancedWage;
+import Backend.WageStrategies.WageDepartmentBased;
 import College.Department;
 import College.DepartmentNotExistException;
 import College.People.Employee;
@@ -199,6 +206,68 @@ public class MainMenu {
         end.add(buttonDelete);
         end.add(filterButton);
         end.add(clearFiltersButton);
+        Button changeStrategyButton = new Button("Strategy");
+        changeStrategyButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Dialog dialog = new Dialog(mainFrame);
+                dialog.addWindowListener(new DialogClose(dialog));
+                dialog.setSize(300, 200);
+                dialog.setLayout(new BoxLayout(dialog, BoxLayout.Y_AXIS));
+
+                Button linearButton = new Button("Linear Stipend Strategy");
+                Button logButton = new Button("Log Stipend Strategy");
+                Button basicSalaryButton = new Button("Basic salary strategy");
+                Button advancedSalaryButton = new Button("Advanced salary strategy");
+
+                linearButton.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        backend.setStipend(new LinearCourseCountBased());
+                    }
+                    
+                });
+
+                logButton.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        backend.setStipend(new LogCourseCountBased());
+                    }
+                    
+                });
+
+                basicSalaryButton.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        backend.setWage(new WageDepartmentBased());
+                    }
+                    
+                });
+
+                advancedSalaryButton.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        backend.setWage(new AdvancedWage());
+                    }
+                    
+                });
+                
+                dialog.add(linearButton);
+                dialog.add(logButton);
+                dialog.add(basicSalaryButton);
+                dialog.add(advancedSalaryButton);
+                
+                dialog.setModalityType(ModalityType.APPLICATION_MODAL);
+                dialog.setVisible(true);
+            }
+            
+        });
+        end.add(changeStrategyButton);
         
         mainFrame.add(top, BorderLayout.PAGE_START);
         mainFrame.add(list, BorderLayout.LINE_START);
